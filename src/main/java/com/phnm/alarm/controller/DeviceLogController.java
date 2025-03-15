@@ -1,7 +1,7 @@
 package com.phnm.alarm.controller;
 
 import com.phnm.alarm.dto.DeviceLog;
-import com.phnm.alarm.service.KafkaProducerService;
+import com.phnm.alarm.service.impl.KafkaProducerServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/device-log")
 public class DeviceLogController {
-    private final KafkaProducerService kafkaProducerService;
+    private final KafkaProducerServiceImpl kafkaProducerService;
 
     @PostMapping
     public ResponseEntity<String> sendLog(@RequestBody DeviceLog deviceLog) {
