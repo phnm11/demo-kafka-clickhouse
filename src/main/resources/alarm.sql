@@ -1,3 +1,7 @@
+CREATE DATABASE IF NOT EXISTS alarm;
+
+DROP TABLE alarm.alarm_logs_stored;
+
 CREATE TABLE alarm.alarm_logs_stored
 (
     alarmIdentifier       String,
@@ -21,6 +25,31 @@ CREATE TABLE alarm.alarm_logs_stored
 ) ENGINE = MergeTree()
       ORDER BY detectionTime;
 
+CREATE TABLE alarm.alarm_logs_stored
+(
+    alarmIdentifier       String,
+    alarmChangeTime       DateTime,
+    severity              String,
+    detectionTime         DateTime,
+    manufacturer          String,
+    productClass          String,
+    serialNumber          String,
+    eventType             String,
+    eventTime             DateTime,
+    category              String,
+    probableCause         String,
+    specificProblem       String,
+    additionalText        String,
+    additionalInformation String,
+    notificationType      String,
+    managedObjectInstance String,
+    pppoeAccount          String,
+    controllerSerial      String
+) ENGINE = ReplacingMergeTree(eventTime)
+      ORDER BY alarmIdentifier;
+
+DROP TABLE alarm.alarm_logs_kafka;
+
 CREATE TABLE alarm.alarm_logs_kafka
 (
     alarmIdentifier       String,
@@ -43,10 +72,40 @@ CREATE TABLE alarm.alarm_logs_kafka
     controllerSerial      String
 ) ENGINE = Kafka
       SETTINGS kafka_broker_list = 'kafka:9093',
-          kafka_topic_list = 'alarm-topic',
+          kafka_topic_list = 'alarm',
           kafka_group_name = 'clickhouse-alarm',
           kafka_format = 'JSONEachRow',
+          kafka_num_consumers = 8,
           kafka_flush_interval_ms = 5000;
+
+CREATE TABLE alarm.alarm_logs_kafka
+(
+    alarmIdentifier       String,
+    alarmChangeTime       DateTime,
+    severity              UInt32,
+    detectionTime         DateTime,
+    manufacturer          String,
+    productClass          String,
+    serialNumber          String,
+    eventType             String,
+    eventTime             DateTime,
+    category              String,
+    probableCause         String,
+    specificProblem       String,
+    additionalText        String,
+    additionalInformation String,
+    notificationType      String,
+    managedObjectInstance String,
+    pppoeAccount          String,
+    controllerSerial      String
+) ENGINE = Kafka
+      SETTINGS kafka_broker_list = '25.0.0.250:9092',
+          kafka_topic_list = 'tbl_history_alarm',
+          kafka_group_name = 'alarm_group',
+          kafka_format = 'JSONEachRow',
+          kafka_flush_interval_ms = 5000;
+
+DROP TABLE alarm.alarm_logs_mv;
 
 CREATE MATERIALIZED VIEW alarm.alarm_logs_mv TO alarm.alarm_logs_stored AS
 SELECT *
@@ -455,7 +514,76 @@ CREATE TABLE alarm.vgp42x6v1_productClass_alarm
 ) ENGINE = MergeTree()
       ORDER BY detectionTime;
 
+CREATE TABLE alarm.vgp42x6v1_productClass_alarm
+(
+    alarmIdentifier       String,
+    alarmChangeTime       DateTime,
+    severity              UInt32,
+    detectionTime         DateTime,
+    manufacturer          String,
+    productClass          String,
+    serialNumber          String,
+    eventType             String,
+    eventTime             DateTime,
+    category              String,
+    probableCause         String,
+    specificProblem       String,
+    additionalText        String,
+    additionalInformation String,
+    notificationType      String,
+    managedObjectInstance String,
+    pppoeAccount          String,
+    controllerSerial      String
+) ENGINE = ReplacingMergeTree(eventTime)
+      ORDER BY alarmIdentifier;
+
 CREATE TABLE alarm.vg421wdv2_productClass_alarm
+(
+    alarmIdentifier       String,
+    alarmChangeTime       DateTime,
+    severity              String,
+    detectionTime         DateTime,
+    manufacturer          String,
+    productClass          String,
+    serialNumber          String,
+    eventType             String,
+    eventTime             DateTime,
+    category              String,
+    probableCause         String,
+    specificProblem       String,
+    additionalText        String,
+    additionalInformation String,
+    notificationType      String,
+    managedObjectInstance String,
+    pppoeAccount          String,
+    controllerSerial      String
+) ENGINE = MergeTree()
+      ORDER BY detectionTime;
+
+CREATE TABLE alarm.vg421wdv2_productClass_alarm
+(
+    alarmIdentifier       String,
+    alarmChangeTime       DateTime,
+    severity              UInt32,
+    detectionTime         DateTime,
+    manufacturer          String,
+    productClass          String,
+    serialNumber          String,
+    eventType             String,
+    eventTime             DateTime,
+    category              String,
+    probableCause         String,
+    specificProblem       String,
+    additionalText        String,
+    additionalInformation String,
+    notificationType      String,
+    managedObjectInstance String,
+    pppoeAccount          String,
+    controllerSerial      String
+) ENGINE = ReplacingMergeTree(eventTime)
+      ORDER BY alarmIdentifier;
+
+CREATE TABLE alarm.vap120wd_productClass_alarm
 (
     alarmIdentifier       String,
     alarmChangeTime       DateTime,
@@ -482,7 +610,7 @@ CREATE TABLE alarm.vap120wd_productClass_alarm
 (
     alarmIdentifier       String,
     alarmChangeTime       DateTime,
-    severity              String,
+    severity              UInt32,
     detectionTime         DateTime,
     manufacturer          String,
     productClass          String,
@@ -498,27 +626,27 @@ CREATE TABLE alarm.vap120wd_productClass_alarm
     managedObjectInstance String,
     pppoeAccount          String,
     controllerSerial      String
-) ENGINE = MergeTree()
-      ORDER BY detectionTime;
+) ENGINE = ReplacingMergeTree(eventTime)
+      ORDER BY alarmIdentifier;
 
 -- Create mv to filter productClass
 
 CREATE MATERIALIZED VIEW alarm.vap120wd_productClass_alarm_mv
-            TO alarm.vap120wd_productClass_alarm
+    TO alarm.vap120wd_productClass_alarm
 AS
 SELECT *
 FROM alarm.alarm_logs_stored
 WHERE productClass = 'vAP-120WD';
 
 CREATE MATERIALIZED VIEW alarm.vg421wdv2_productClass_alarm_mv
-            TO alarm.vg421wdv2_productClass_alarm
+    TO alarm.vg421wdv2_productClass_alarm
 AS
 SELECT *
 FROM alarm.alarm_logs_stored
 WHERE productClass = 'vG-421WD-v2';
 
 CREATE MATERIALIZED VIEW alarm.vgp42x6v1_productClass_alarm_mv
-            TO alarm.vgp42x6v1_productClass_alarm
+    TO alarm.vgp42x6v1_productClass_alarm
 AS
 SELECT *
 FROM alarm.alarm_logs_stored

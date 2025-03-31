@@ -21,7 +21,7 @@ public class AlarmController {
 
     @PostMapping
     public ResponseEntity<String> sendLog(@RequestBody AlarmDTO alarmDTO) {
-        kafkaProducerService.sendLog("alarm-topic", alarmDTO);
+        kafkaProducerService.sendLog("alarm", alarmDTO);
         return ResponseEntity.ok("Alarm sent to Kafka successfully");
     }
 
